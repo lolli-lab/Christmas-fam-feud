@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Family Feud – Christmas Edition</title>
+  <style>
+    :root {
+      --bg-dark: #4b0000;
+      --bg-red: #b30000;
+      --frame-gold: #ffcc66;
+      --frame-gold-glow: #ffe9a8;
+      --frame-gold-dark: #996600;
+      --panel-gold: #ffde73;
+      --panel-border: #ffe9a8;
+      --panel-shadow: #8b0000;
+      --answer-green: #0c4d0c;
+      --answer-green-light: #2e8b2e;
+      --button-blue: #0d5bd7;
+      --button-green: #0c7a26;
+      --strike-red: #d12626;
+      font-family: "Arial Rounded MT Bold", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #b30000, #4b0000);
+      color: white;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .frame {
+      width: 100%;
+      padding: 16px 0 8px;
+      background: linear-gradient(#8a0000, #b30000);
+      box-shadow: 0 0 25px var(--frame-gold-glow) inset;
+      border-bottom: 6px solid var(--frame-gold);
+      text-align: center;
+    }
+
+    .title {
+      display: inline-block;
+      padding: 10px 30px;
+      border-radius: 40px;
+      background: radial-gradient(circle at 20% 0%, #fff8dd, #ffde73 45%, #ffb032 80%);
+      color: #6b0000;
+      font-size: 30px;
+      font-weight: 800;
+      border: 4px solid var(--frame-gold-dark);
+      text-shadow: 0 0 6px #fff4cc;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      margin-top: 6px;
+      color: #ffe9b7;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .content {
+      display: flex;
+      gap: 20px;
+      padding: 16px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .left-column {
+      flex: 1;
+      min-width: 320px;
+      max-width: 900px;
+    }
+
+    .board {
+      background: linear-gradient(#ffe9b7, #ffcc66);
+      border: 6px solid var(--frame-gold);
+      border-radius: 28px;
+      box-shadow: 0 0 20px var(--frame-gold-glow) inset, 0 12px 26px rgba(0,0,0,0.6);
+      padding: 18px;
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .board-inner {
+      background: radial-gradient(circle at top, #ffefc4, #ffcc66 40%, #ffb347 75%);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 0 10px #fff8dd inset;
+    }
+
+    .question {
+      text-align: center;
+      background: linear-gradient(#b30000, #6b0000);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 18px;
+      margin-bottom: 14px;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 0 12px var(--panel-shadow) inset, 0 4px 10px rgba(0,0,0,0.6);
+    }
+
+    .round-indicator {
+      font-size: 12px;
+      margin-bottom: 4px;
+      text-align: right;
+      color: #6b0000;
+      font-weight: 600;
+    }
+
+    .answer-row {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+      gap: 8px;
+    }
+
+    .answer-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: linear-gradient(#ffde73, #ffb347);
+      border: 2px solid #fff7d0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b0000;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    .answer-bar {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(#0b3f0b, #0c4d0c);
+      border-radius: 999px;
+      padding: 8px 16px;
+      color: #f2ffe9;
+      cursor: pointer;
+      box-shadow: 0 0 10px #000 inset;
+      transition: background 0.2s, transform 0.05s;
+      min-height: 38px;
+    }
+
+    .answer-bar:active {
+      transform: translateY(1px);
+    }
+
+    .answer-bar.revealed {
+      background: linear-gradient(#2e8b2e, #146b14);
+      font-weight: bold;
+    }
+
+    .answer-text {
+      flex: 1;
+      text-align: left;
+      font-size: 17px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .answer-placeholder {
+      opacity: 0.75;
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    .answer-points {
+      margin-left: 12px;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .panel {
+      width: 320px;
+      background: radial-gradient(circle at top, #372362, #160c2a);
+      padding: 16px;
+      border-radius: 22px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.9);
+      border: 2px solid rgba(255,255,255,0.18);
+      min-width: 260px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #ffd37f;
+      font-weight: bold;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .team-box {
+      background: rgba(4,4,32,0.9);
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border: 1px solid #443366;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .team-name {
+      flex: 1;
+      font-weight: 600;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .team-score {
+      min-width: 42px;
+      text-align: right;
+      color: #6cff6c;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .buttons-row {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      background: #555;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .btn-team1 { background: linear-gradient(#ff4b4b, #b11919); }
+    .btn-team2 { background: linear-gradient(#ffd76a, #c18a14); color: #3c2400; }
+    .btn-skip  { background: #3d375f; }
+
+    .btn-nav   { background: #27417f; }
+    .btn-reset { background: #8a2020; }
+
+    .btn-mode {
+      background: #3b2c6e;
+      font-size: 11px;
+      padding: 4px 10px;
+    }
+    .btn-mode.active-mode {
+      background: #1fa347;
+    }
+
+    .mode-toggle {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #ffe9b7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mode-label {
+      font-weight: 600;
+    }
+
+    .last-label {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #f3e6ff;
+      min-height: 32px;
+    }
+
+    .strikes-row {
+      margin-top: 10px;
+    }
+
+    .strike-label {
+      font-size: 12px;
+      color: #ffd37f;
+      margin-bottom: 4px;
+    }
+
+    .strike-boxes {
+      display: flex;
+      gap: 8px;
+    }
+
+    .strike {
+      width: 34px;
+      height: 34px;
+      background: #2a0000;
+      border: 2px solid var(--strike-red);
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--strike-red);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+    }
+
+    .strike.active {
+      background: var(--strike-red);
+      color: white;
+    }
+
+    .round-controls {
+      margin-top: 12px;
+      font-size: 11px;
+    }
+
+    .round-info {
+      margin-bottom: 4px;
+      color: #ffe9b7;
+      font-weight: 600;
+    }
+
+    .lights {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .bulb {
+      position: absolute;
+      width: 20px;
+      height: 28px;
+      border-radius: 50% 50% 55% 55%;
+      background: #44aa44;
+      box-shadow: 0 0 8px rgba(0,0,0,0.9);
+    }
+
+    .bulb-red { background: #ff4b4b; }
+    .bulb-green { background: #44d144; }
+    .bulb-yellow { background: #ffe36a; }
+    .bulb-blue { background: #4ba5ff; }
+
+    .bulb::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 5px;
+      right: 5px;
+      height: 6px;
+      border-radius: 4px;
+      background: #333;
+    }
+
+    .bulb::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      right: 4px;
+      bottom: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0%, #ffffffaa 0, transparent 55%);
+      mix-blend-mode: screen;
+    }
+
+    /* Fast Money styling */
+    .fm-inner {
+      padding: 14px 16px 18px;
+    }
+
+    .fm-title {
+      font-size: 22px;
+    }
+
+    .fm-subtitle {
+      font-size: 12px;
+      margin: 4px 0 10px;
+      color: #5a0000;
+    }
+
+    .fm-totals-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #5a0000;
+      flex-wrap: wrap;
+    }
+
+    .fm-total span {
+      font-size: 18px;
+      color: #b30000;
+    }
+
+    /* green question bubble */
+    .fm-row {
+      margin-bottom: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: linear-gradient(#0f5a16, #083b0c);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25) inset;
+      border: 1px solid #2e8b2e;
+    }
+
+    .fm-q {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e7ffe4;
+      margin-bottom: 4px;
+    }
+
+    .fm-input-row {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .fm-cell {
+      flex: 1;
+      min-width: 140px;
+      padding: 0 4px;
+    }
+
+    .fm-cell-p1 {
+      padding-right: 8px;
+    }
+
+    /* red dividing line between P1 and P2 */
+    .fm-cell-p2 {
+      border-left: 2px solid #b30000;
+      margin-left: 4px;
+      padding-left: 10px;
+    }
+
+    .fm-col-label {
+      font-size: 11px;
+      color: #ffe9b7;
+      margin-bottom: 2px;
+    }
+
+    .fm-answer {
+      width: 100%;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid #c98b00;
+      font-size: 13px;
+      margin-bottom: 3px;
+      box-sizing: border-box;
+    }
+
+    .fm-score {
+      width: 100%;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid #c98b00;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    /* Hide P1 overlay */
+    body.fm-hide-p1 .fm-cell-p1 {
+      position: relative;
+    }
+
+    body.fm-hide-p1 .fm-cell-p1::after {
+      content: "Hidden for Player 2";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.75);
+      border-radius: 10px;
+      pointer-events: none;
+      text-align: center;
+      padding: 4px;
+    }
+
+    body.fm-hide-p1 .fm-cell-p1 .fm-answer,
+    body.fm-hide-p1 .fm-cell-p1 .fm-score {
+      color: transparent;
+    }
+
+    body.fm-hide-p1 .fm-cell-p1 .fm-answer::placeholder,
+    body.fm-hide-p1 .fm-cell-p1 .fm-score::placeholder {
+      color: transparent;
+    }
+
+    @media (max-width: 900px) {
+      .panel {
+        width: 100%;
+        max-width: 360px;
+      }
+      .content {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Simple audio elements for ding & buzz -->
+  <audio id="dingSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" type="audio/ogg" />
+  </audio>
+  <audio id="buzzSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" type="audio/ogg" />
+  </audio>
+
+  <div class="frame">
+    <div class="title">FAMILY FEUD</div>
+    <div class="subtitle">CHRISTMAS EDITION</div>
+  </div>
+
+  <div class="content">
+    <div class="left-column">
+      <!-- Normal board mode -->
+      <div class="board" id="boardNormal">
+        <div class="lights" id="lightsLayer"></div>
+        <div class="board-inner">
+          <div class="round-indicator" id="roundIndicator">Round 1 of 20</div>
+          <div class="question" id="questionText">Loading question…</div>
+          <div id="answersContainer"></div>
+        </div>
+      </div>
+
+      <!-- Fast Money mode -->
+      <div class="board" id="boardFast" style="display:none;">
+        <div class="board-inner fm-inner">
+          <div class="question fm-title">Fast Money Round</div>
+          <div class="fm-subtitle">
+            Two players, five questions each. Type answers; known answers auto-score, or enter scores manually. Totals update automatically.
+          </div>
+          <div class="fm-totals-row">
+            <div class="fm-total">Player 1 Total: <span id="fmTotal1">0</span></div>
+            <div class="fm-total">Player 2 Total: <span id="fmTotal2">0</span></div>
+          </div>
+          <div id="fmQuestions"></div>
+          <div class="buttons-row" style="margin-top:10px;">
+            <button class="btn btn-skip" id="fmHideP1">Hide P1 answers</button>
+            <button class="btn btn-skip" id="fmShowP1">Show P1 answers</button>
+            <button class="btn btn-reset" id="fmReset">Reset Fast Money</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Scores</div>
+
+      <div class="team-box">
+        <div class="team-name" id="team1Name" contenteditable="true">Team 1</div>
+        <div class="team-score" id="team1Score">0</div>
+      </div>
+      <div class="team-box">
+        <div class="team-name" id="team2Name" contenteditable="true">Team 2</div>
+        <div class="team-score" id="team2Score">0</div>
+      </div>
+
+      <div class="panel-title" style="margin-top:10px;">Award Points</div>
+      <div class="buttons-row">
+        <button class="btn btn-team1" id="btnTeam1">+ Team 1</button>
+        <button class="btn btn-team2" id="btnTeam2">+ Team 2</button>
+        <button class="btn btn-skip" id="btnSkip">Skip</button>
+      </div>
+
+      <div class="last-label" id="lastLabel">
+        Tap an answer bar to reveal it, then award its points to a team.
+      </div>
+
+      <div class="strikes-row">
+        <div class="strike-label">Strikes (tap to toggle):</div>
+        <div class="strike-boxes">
+          <div class="strike" data-strike="0">X</div>
+          <div class="strike" data-strike="1">X</div>
+          <div class="strike" data-strike="2">X</div>
+        </div>
+      </div>
+
+      <div class="round-controls">
+        <div class="round-info" id="roundInfo">Use Prev / Next to change rounds.</div>
+        <div class="buttons-row">
+          <button class="btn btn-nav" id="btnPrev">&lt; Prev Round</button>
+          <button class="btn btn-nav" id="btnNext">Next Round &gt;</button>
+          <button class="btn btn-reset" id="btnResetRound">Reset Round</button>
+          <button class="btn btn-reset" id="btnResetGame">Reset Game</button>
+        </div>
+      </div>
+
+      <div class="mode-toggle">
+        <span class="mode-label">Mode:</span>
+        <button class="btn btn-mode active-mode" id="btnModeBoard">Board</button>
+        <button class="btn btn-mode" id="btnModeFast">Fast Money</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Question data: 20 normal rounds ----
+    const ROUNDS = [
+      {
+        id: 1,
+        question: "Name something you put on top of a Christmas tree.",
+        answers: [
+          { text: "Star", points: 30 },
+          { text: "Angel", points: 25 },
+          { text: "Bow", points: 15 },
+          { text: "Snowflake", points: 6 },
+          { text: "Santa hat", points: 5 },
+          { text: "Nothing", points: 4 },
+          { text: "Homemade ornament", points: 3 },
+          { text: "Tree topper words", points: 2 }
+        ]
+      },
+      {
+        id: 2,
+        question: "Name a popular Christmas movie.",
+        answers: [
+          { text: "Home Alone", points: 30 },
+          { text: "Elf", points: 25 },
+          { text: "It\u2019s a Wonderful Life", points: 15 },
+          { text: "The Grinch", points: 10 },
+          { text: "A Christmas Story", points: 8 },
+          { text: "The Polar Express", points: 6 },
+          { text: "Miracle on 34th Street", points: 4 },
+          { text: "The Santa Clause", points: 2 }
+        ]
+      },
+      {
+        id: 3,
+        question: "Name a food you eat at Christmas dinner.",
+        answers: [
+          { text: "Ham", points: 30 },
+          { text: "Turkey", points: 22 },
+          { text: "Mashed potatoes", points: 16 },
+          { text: "Stuffing", points: 10 },
+          { text: "Green bean casserole", points: 8 },
+          { text: "Rolls", points: 6 },
+          { text: "Pie", points: 5 },
+          { text: "Mac and cheese", points: 3 }
+        ]
+      },
+      {
+        id: 4,
+        question: "Name a Christmas song everyone knows.",
+        answers: [
+          { text: "Jingle Bells", points: 26 },
+          { text: "Silent Night", points: 22 },
+          { text: "Deck the Halls", points: 15 },
+          { text: "O Holy Night", points: 10 },
+          { text: "Joy to the World", points: 9 },
+          { text: "Rudolph the Red-Nosed Reindeer", points: 8 },
+          { text: "We Wish You a Merry Christmas", points: 6 },
+          { text: "O Come All Ye Faithful", points: 4 }
+        ]
+      },
+      {
+        id: 5,
+        question: "Name something you do on Christmas Eve.",
+        answers: [
+          { text: "Open one present", points: 24 },
+          { text: "Go to church", points: 20 },
+          { text: "Have dinner with family", points: 18 },
+          { text: "Bake cookies", points: 12 },
+          { text: "Watch Christmas movies", points: 10 },
+          { text: "Read the Christmas story", points: 8 },
+          { text: "Put out stockings", points: 5 },
+          { text: "Wrap last-minute gifts", points: 3 }
+        ]
+      },
+      {
+        id: 6,
+        question: "Name somewhere you might hang Christmas lights.",
+        answers: [
+          { text: "House roof", points: 28 },
+          { text: "Front porch", points: 22 },
+          { text: "Christmas tree", points: 18 },
+          { text: "Yard or bushes", points: 10 },
+          { text: "Fence", points: 7 },
+          { text: "Around windows", points: 6 },
+          { text: "On a banister", points: 5 },
+          { text: "On a car, RV, or boat", points: 2 }
+        ]
+      },
+      {
+        id: 7,
+        question: "Name a Christmas decoration besides a tree.",
+        answers: [
+          { text: "Wreath", points: 28 },
+          { text: "Stockings", points: 22 },
+          { text: "Nativity scene", points: 14 },
+          { text: "Garland", points: 10 },
+          { text: "Lights", points: 9 },
+          { text: "Snowman", points: 7 },
+          { text: "Candles", points: 6 },
+          { text: "Christmas village", points: 4 }
+        ]
+      },
+      {
+        id: 8,
+        question: "Name a Christmas activity kids love.",
+        answers: [
+          { text: "Opening presents", points: 30 },
+          { text: "Baking cookies", points: 18 },
+          { text: "Seeing Santa", points: 14 },
+          { text: "Looking at lights", points: 12 },
+          { text: "Playing in snow", points: 10 },
+          { text: "Gingerbread houses", points: 8 },
+          { text: "Singing carols", points: 5 },
+          { text: "School Christmas party", points: 3 }
+        ]
+      },
+      {
+        id: 9,
+        question: "Name something that smells like Christmas.",
+        answers: [
+          { text: "Pine tree", points: 26 },
+          { text: "Cinnamon", points: 22 },
+          { text: "Cookies baking", points: 18 },
+          { text: "Peppermint", points: 10 },
+          { text: "Hot chocolate", points: 8 },
+          { text: "Candles", points: 6 },
+          { text: "Orange and cloves", points: 5 },
+          { text: "Fireplace", points: 3 }
+        ]
+      },
+      {
+        id: 10,
+        question: "Name something associated with pirates.",
+        answers: [
+          { text: "Treasure", points: 26 },
+          { text: "Ship", points: 22 },
+          { text: "Eye patch", points: 14 },
+          { text: "Parrot", points: 10 },
+          { text: "Sword", points: 8 },
+          { text: "Hook hand", points: 7 },
+          { text: "Pirate hat", points: 6 },
+          { text: "Skull and crossbones flag", points: 4 }
+        ]
+      },
+      {
+        id: 11,
+        question: "Name a place you might see Christmas lights.",
+        answers: [
+          { text: "Neighborhood houses", points: 28 },
+          { text: "Downtown or main street", points: 20 },
+          { text: "Theme park", points: 14 },
+          { text: "Zoo", points: 10 },
+          { text: "Botanical garden", points: 8 },
+          { text: "Church", points: 6 },
+          { text: "Shopping mall", points: 5 },
+          { text: "On TV", points: 3 }
+        ]
+      },
+      {
+        id: 12,
+        question: "Name something you drink in the winter.",
+        answers: [
+          { text: "Hot chocolate", points: 30 },
+          { text: "Coffee", points: 20 },
+          { text: "Tea", points: 16 },
+          { text: "Apple cider", points: 12 },
+          { text: "Eggnog", points: 8 },
+          { text: "Soup or broth", points: 6 },
+          { text: "Peppermint mocha", points: 4 },
+          { text: "Mulled wine", points: 3 }
+        ]
+      },
+      {
+        id: 13,
+        question: "Name a Christmas gift that\u2019s hard to wrap.",
+        answers: [
+          { text: "Bicycle", points: 26 },
+          { text: "Ball", points: 20 },
+          { text: "Stuffed animal", points: 14 },
+          { text: "Guitar", points: 10 },
+          { text: "Basket", points: 8 },
+          { text: "Tool set", points: 7 },
+          { text: "Odd-shaped toy", points: 6 },
+          { text: "Kitchen appliance", points: 4 }
+        ]
+      },
+      {
+        id: 14,
+        question: "Name something you might do in the snow.",
+        answers: [
+          { text: "Build a snowman", points: 26 },
+          { text: "Snowball fight", points: 22 },
+          { text: "Sledding", points: 16 },
+          { text: "Skiing", points: 10 },
+          { text: "Snow angels", points: 8 },
+          { text: "Snowboarding", points: 6 },
+          { text: "Shovel driveway", points: 5 },
+          { text: "Ice skating", points: 3 }
+        ]
+      },
+      {
+        id: 15,
+        question: "Name something you associate with Santa Claus.",
+        answers: [
+          { text: "Reindeer", points: 24 },
+          { text: "Sleigh", points: 20 },
+          { text: "Red suit", points: 16 },
+          { text: "North Pole", points: 12 },
+          { text: "Milk and cookies", points: 10 },
+          { text: "Presents", points: 8 },
+          { text: "Ho ho ho", points: 6 },
+          { text: "Elves", points: 4 }
+        ]
+      },
+      {
+        id: 16,
+        question: "Name a reason someone might be late on Christmas Day.",
+        answers: [
+          { text: "Overslept", points: 24 },
+          { text: "Weather or roads", points: 20 },
+          { text: "Kids opening presents", points: 16 },
+          { text: "Cooking took too long", points: 12 },
+          { text: "Forgot something", points: 10 },
+          { text: "Traffic", points: 8 },
+          { text: "Car trouble", points: 6 },
+          { text: "Church ran long", points: 4 }
+        ]
+      },
+      {
+        id: 17,
+        question: "Name something that jingles.",
+        answers: [
+          { text: "Bells", points: 30 },
+          { text: "Keys", points: 20 },
+          { text: "Dog's collar", points: 16 },
+          { text: "Change in pocket", points: 10 },
+          { text: "Bracelets", points: 8 },
+          { text: "Sleigh bells", points: 6 },
+          { text: "Phone alerts", points: 4 },
+          { text: "Christmas ornaments", points: 3 }
+        ]
+      },
+      {
+        id: 18,
+        question: "Name something people do the day after Christmas.",
+        answers: [
+          { text: "Shop sales", points: 26 },
+          { text: "Clean wrapping paper", points: 22 },
+          { text: "Return gifts", points: 16 },
+          { text: "Eat leftovers", points: 10 },
+          { text: "Sleep or rest", points: 8 },
+          { text: "Take down decorations", points: 6 },
+          { text: "Visit more family", points: 5 },
+          { text: "Play with new gifts", points: 3 }
+        ]
+      },
+      {
+        id: 19,
+        question: "Name a winter clothing item.",
+        answers: [
+          { text: "Coat", points: 28 },
+          { text: "Gloves", points: 20 },
+          { text: "Hat or beanie", points: 16 },
+          { text: "Scarf", points: 12 },
+          { text: "Boots", points: 10 },
+          { text: "Sweater", points: 7 },
+          { text: "Thermal underwear", points: 4 },
+          { text: "Earmuffs", points: 3 }
+        ]
+      },
+      {
+        id: 20,
+        question: "Name something you might find in a stocking.",
+        answers: [
+          { text: "Candy", points: 28 },
+          { text: "Small toys", points: 20 },
+          { text: "Gift cards", points: 14 },
+          { text: "Fruit or orange", points: 10 },
+          { text: "Socks", points: 8 },
+          { text: "Lip balm", points: 6 },
+          { text: "Pens or markers", points: 4 },
+          { text: "Money", points: 3 }
+        ]
+      }
+    ];
+
+    // ---- Fast Money questions + built-in answer values ----
+    const FAST_MONEY = [
+      {
+        q: "Name something you do first thing on Christmas morning.",
+        answers: [
+          { text: "Open presents", points: 40 },
+          { text: "Check stockings", points: 25 },
+          { text: "Make coffee", points: 15 },
+          { text: "Wake up the kids", points: 10 },
+          { text: "Take pictures", points: 8 },
+          { text: "Pray", points: 5 },
+          { text: "Call family", points: 4 }
+        ]
+      },
+      {
+        q: "Name a Christmas decoration you might pack away last.",
+        answers: [
+          { text: "Tree", points: 35 },
+          { text: "Lights", points: 25 },
+          { text: "Wreath", points: 15 },
+          { text: "Stockings", points: 10 },
+          { text: "Nativity scene", points: 8 },
+          { text: "Inflatables", points: 5 },
+          { text: "Garland", points: 4 }
+        ]
+      },
+      {
+        q: "Name a word you think of when you hear 'North Pole'.",
+        answers: [
+          { text: "Santa", points: 35 },
+          { text: "Cold", points: 25 },
+          { text: "Elves", points: 15 },
+          { text: "Snow", points: 10 },
+          { text: "Reindeer", points: 8 },
+          { text: "Workshop", points: 5 },
+          { text: "Ice", points: 4 }
+        ]
+      },
+      {
+        q: "Name a gift that’s easy to re-gift.",
+        answers: [
+          { text: "Candle", points: 30 },
+          { text: "Sweater", points: 22 },
+          { text: "Mug", points: 16 },
+          { text: "Gift card", points: 12 },
+          { text: "Lotion", points: 10 },
+          { text: "Fruitcake", points: 6 },
+          { text: "Scented soap", points: 4 }
+        ]
+      },
+      {
+        q: "Name something you need two of for Christmas dinner.",
+        answers: [
+          { text: "Pies", points: 26 },
+          { text: "Tables", points: 22 },
+          { text: "Ovens", points: 18 },
+          { text: "Turkeys", points: 10 },
+          { text: "Casseroles", points: 8 },
+          { text: "Serving spoons", points: 6 },
+          { text: "Chairs", points: 4 }
+        ]
+      }
+    ];
+
+    // ---- Simple audio using <audio> elements ----
+    function playDing() {
+      const a = document.getElementById("dingSound");
+      if (!a) return;
+      a.currentTime = 0;
+      a.play().catch(() => {});
+    }
+
+    function playBuzz() {
+      const a = document.getElementById("buzzSound");
+      if (!a) return;
+      a.currentTime = 0;
+      a.play().catch(() => {});
+    }
+
+    // ---- State ----
+    let currentRoundIndex = 0;
+    let scores = [0, 0];
+    let lastRevealed = null;
+
+    const questionEl = document.getElementById("questionText");
+    const answersContainer = document.getElementById("answersContainer");
+    const roundIndicator = document.getElementById("roundIndicator");
+    const team1ScoreEl = document.getElementById("team1Score");
+    const team2ScoreEl = document.getElementById("team2Score");
+    const lastLabel = document.getElementById("lastLabel");
+
+    function updateScores() {
+      team1ScoreEl.textContent = scores[0];
+      team2ScoreEl.textContent = scores[1];
+    }
+
+    function renderRound() {
+      const round = ROUNDS[currentRoundIndex];
+      roundIndicator.textContent = "Round " + round.id + " of " + ROUNDS.length;
+      questionEl.textContent = round.question;
+      answersContainer.innerHTML = "";
+      lastRevealed = null;
+      lastLabel.textContent =
+        "Tap an answer bar to reveal it, then award its points to a team.";
+
+      round.answers.forEach((ans, idx) => {
+        const row = document.createElement("div");
+        row.className = "answer-row";
+
+        const num = document.createElement("div");
+        num.className = "answer-num";
+        num.textContent = idx + 1;
+        row.appendChild(num);
+
+        const bar = document.createElement("div");
+        bar.className = "answer-bar";
+        bar.dataset.index = idx;
+
+        const text = document.createElement("div");
+        text.className = "answer-text answer-placeholder";
+        text.textContent = "Tap to reveal";
+        bar.appendChild(text);
+
+        const pts = document.createElement("div");
+        pts.className = "answer-points";
+        pts.textContent = "";
+        bar.appendChild(pts);
+
+        bar.addEventListener("click", () => revealAnswer(idx));
+
+        row.appendChild(bar);
+        answersContainer.appendChild(row);
+      });
+
+      document.querySelectorAll(".strike").forEach(s =>
+        s.classList.remove("active")
+      );
+    }
+
+    function revealAnswer(idx) {
+      const round = ROUNDS[currentRoundIndex];
+      const ans = round.answers[idx];
+      const row = answersContainer.children[idx];
+      if (!row) return;
+      const bar = row.querySelector(".answer-bar");
+      const textEl = row.querySelector(".answer-text");
+      const ptsEl = row.querySelector(".answer-points");
+
+      if (!bar.classList.contains("revealed")) {
+        bar.classList.add("revealed");
+        textEl.classList.remove("answer-placeholder");
+        textEl.textContent = ans.text;
+        ptsEl.textContent = ans.points;
+        playDing();
+      }
+
+      lastRevealed = { roundIndex: currentRoundIndex, answerIndex: idx };
+      lastLabel.innerHTML = `Last revealed: "<strong>${ans.text}</strong>" (${ans.points} points). Choose a team to award the points.`;
+    }
+
+    function clampRoundIndex(i) {
+      if (i < 0) return 0;
+      if (i >= ROUNDS.length) return ROUNDS.length - 1;
+      return i;
+    }
+
+    function awardPoints(teamIndex) {
+      if (!lastRevealed) {
+        lastLabel.textContent =
+          "Reveal an answer first, then award its points.";
+        return;
+      }
+      const round = ROUNDS[lastRevealed.roundIndex];
+      const ans = round.answers[lastRevealed.answerIndex];
+      scores[teamIndex] += ans.points;
+      updateScores();
+      const teamNameEl =
+        teamIndex === 0
+          ? document.getElementById("team1Name")
+          : document.getElementById("team2Name");
+      const name =
+        (teamNameEl.textContent || "").trim() ||
+        (teamIndex === 0 ? "Team 1" : "Team 2");
+      lastLabel.innerHTML = `Awarded <strong>${ans.points}</strong> points for "<strong>${ans.text}</strong>" to <strong>${name}</strong>.`;
+    }
+
+    // Buttons for board scoring
+    document
+      .getElementById("btnTeam1")
+      .addEventListener("click", () => awardPoints(0));
+    document
+      .getElementById("btnTeam2")
+      .addEventListener("click", () => awardPoints(1));
+    document.getElementById("btnSkip").addEventListener("click", () => {
+      if (!lastRevealed) {
+        lastLabel.textContent = "Reveal an answer first before skipping.";
+        return;
+      }
+      lastLabel.textContent = "Skipped awarding points for the last answer.";
+    });
+
+    document.getElementById("btnPrev").addEventListener("click", () => {
+      currentRoundIndex = clampRoundIndex(currentRoundIndex - 1);
+      renderRound();
+    });
+    document.getElementById("btnNext").addEventListener("click", () => {
+      currentRoundIndex = clampRoundIndex(currentRoundIndex + 1);
+      renderRound();
+    });
+    document
+      .getElementById("btnResetRound")
+      .addEventListener("click", () => renderRound());
+    document.getElementById("btnResetGame").addEventListener("click", () => {
+      scores = [0, 0];
+      updateScores();
+      currentRoundIndex = 0;
+      renderRound();
+    });
+
+    // Strikes
+    document.querySelectorAll(".strike").forEach(strike => {
+      strike.addEventListener("click", () => {
+        const isActive = strike.classList.contains("active");
+        if (!isActive) playBuzz();
+        strike.classList.toggle("active");
+      });
+    });
+
+    // Lights around the board
+    function placeLights() {
+      const layer = document.getElementById("lightsLayer");
+      const colors = ["bulb-red", "bulb-green", "bulb-yellow", "bulb-blue"];
+      const positions = [
+        // top
+        { x: 8, y: 4 },
+        { x: 20, y: 2 },
+        { x: 32, y: 4 },
+        { x: 44, y: 2 },
+        { x: 56, y: 4 },
+        { x: 68, y: 2 },
+        { x: 80, y: 4 },
+        { x: 92, y: 2 },
+        // bottom
+        { x: 10, y: 96 },
+        { x: 26, y: 98 },
+        { x: 42, y: 96 },
+        { x: 58, y: 98 },
+        { x: 74, y: 96 },
+        { x: 90, y: 98 },
+        // left
+        { x: 3, y: 16 },
+        { x: 2, y: 32 },
+        { x: 3, y: 48 },
+        { x: 2, y: 64 },
+        { x: 3, y: 80 },
+        // right
+        { x: 97, y: 14 },
+        { x: 98, y: 30 },
+        { x: 97, y: 46 },
+        { x: 98, y: 62 },
+        { x: 97, y: 78 }
+      ];
+      positions.forEach((pos, i) => {
+        const bulb = document.createElement("div");
+        bulb.className = "bulb " + colors[i % colors.length];
+        bulb.style.left = pos.x + "%";
+        bulb.style.top = pos.y + "%";
+        layer.appendChild(bulb);
+      });
+    }
+
+    // ---- Fast Money logic ----
+    function recalcFastMoneyTotals() {
+      let t1 = 0;
+      let t2 = 0;
+      document
+        .querySelectorAll('.fm-score[data-player="1"]')
+        .forEach(inp => {
+          const v = parseInt(inp.value, 10);
+          if (!isNaN(v)) t1 += v;
+        });
+      document
+        .querySelectorAll('.fm-score[data-player="2"]')
+        .forEach(inp => {
+          const v = parseInt(inp.value, 10);
+          if (!isNaN(v)) t2 += v;
+        });
+      document.getElementById("fmTotal1").textContent = t1;
+      document.getElementById("fmTotal2").textContent = t2;
+    }
+
+    function autoScoreForInput(ansInput) {
+      const fmIndex = parseInt(ansInput.dataset.fmIndex, 10);
+      const player = ansInput.dataset.player;
+      const fm = FAST_MONEY[fmIndex];
+      if (!fm || !fm.answers) return;
+
+      const text = ansInput.value.trim().toLowerCase();
+      if (!text) return;
+
+      const match = fm.answers.find(
+        a => a.text.toLowerCase() === text
+      );
+      if (!match) {
+        // No match: don't overwrite any existing manual score
+        return;
+      }
+
+      const scoreInput = ansInput.parentElement.querySelector(
+        '.fm-score[data-player="' + player + '"]'
+      );
+      if (!scoreInput) return;
+
+      scoreInput.value = match.points;
+      recalcFastMoneyTotals();
+    }
+
+    function renderFastMoney() {
+      const container = document.getElementById("fmQuestions");
+      container.innerHTML = "";
+      FAST_MONEY.forEach((item, i) => {
+        const row = document.createElement("div");
+        row.className = "fm-row";
+
+        const q = document.createElement("div");
+        q.className = "fm-q";
+        q.textContent = (i + 1) + ". " + item.q;
+        row.appendChild(q);
+
+        const inputRow = document.createElement("div");
+        inputRow.className = "fm-input-row";
+
+        function makeCell(player) {
+          const cell = document.createElement("div");
+          cell.className = "fm-cell fm-cell-p" + player;
+
+          const label = document.createElement("div");
+          label.className = "fm-col-label";
+          label.textContent = "Player " + player + " answer & points";
+
+          const ans = document.createElement("input");
+          ans.type = "text";
+          ans.className = "fm-answer";
+          ans.placeholder = "Answer";
+          ans.dataset.fmIndex = String(i);
+          ans.dataset.player = String(player);
+          ans.addEventListener("input", () => autoScoreForInput(ans));
+
+          const pts = document.createElement("input");
+          pts.type = "number";
+          pts.className = "fm-score";
+          pts.dataset.player = String(player);
+          pts.placeholder = "Pts";
+          pts.min = "0";
+          pts.inputMode = "numeric";
+          pts.addEventListener("input", recalcFastMoneyTotals);
+
+          cell.appendChild(label);
+          cell.appendChild(ans);
+          cell.appendChild(pts);
+          return cell;
+        }
+
+        inputRow.appendChild(makeCell(1));
+        inputRow.appendChild(makeCell(2));
+
+        row.appendChild(inputRow);
+        container.appendChild(row);
+      });
+
+      recalcFastMoneyTotals();
+    }
+
+    document.getElementById("fmReset").addEventListener("click", () => {
+      document.querySelectorAll(".fm-answer").forEach(i => (i.value = ""));
+      document.querySelectorAll(".fm-score").forEach(i => (i.value = ""));
+      recalcFastMoneyTotals();
+    });
+
+    // Hide / show Player 1 answers
+    document.getElementById("fmHideP1").addEventListener("click", () => {
+      document.body.classList.add("fm-hide-p1");
+    });
+    document.getElementById("fmShowP1").addEventListener("click", () => {
+      document.body.classList.remove("fm-hide-p1");
+    });
+
+    // ---- Mode switching (Board vs Fast Money) ----
+    const boardNormalEl = document.getElementById("boardNormal");
+    const boardFastEl = document.getElementById("boardFast");
+    const btnModeBoard = document.getElementById("btnModeBoard");
+    const btnModeFast = document.getElementById("btnModeFast");
+
+    function setMode(mode) {
+      if (mode === "board") {
+        boardNormalEl.style.display = "";
+        boardFastEl.style.display = "none";
+        btnModeBoard.classList.add("active-mode");
+        btnModeFast.classList.remove("active-mode");
+      } else {
+        boardNormalEl.style.display = "none";
+        boardFastEl.style.display = "";
+        btnModeBoard.classList.remove("active-mode");
+        btnModeFast.classList.add("active-mode");
+      }
+    }
+
+    btnModeBoard.addEventListener("click", () => setMode("board"));
+    btnModeFast.addEventListener("click", () => setMode("fast"));
+
+    // ---- Init ----
+    placeLights();
+    updateScores();
+    renderRound();
+    renderFastMoney();
+    setMode("board");
+
+    // First tap on page should be allowed to play audio
+    window.addEventListener(
+      "touchstart",
+      () => {
+        playDing();
+      },
+      { once: true }
+    );
+  </script>
+</body>
+</html>
