@@ -613,9 +613,100 @@
         justify-content: center;
       }
     }
+    /* ---- Cover screen ---- */
+#coverScreen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #b30000, #4b0000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: #fff4d0;
+  text-align: center;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: opacity 0.4s ease;
+}
+
+#coverScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cover-inner {
+  padding: 32px 40px;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+  max-width: 520px;
+  width: 90%;
+}
+
+.cover-logo {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.cover-subtitle {
+  font-size: 18px;
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+
+.cover-countdown {
+  font-size: 56px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.cover-start-btn {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  background: #ffcf40;
+  color: #5a1a00;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.cover-start-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.cover-hint {
+  margin-top: 16px;
+  font-size: 14px;
+  opacity: 0.9;
+}
   </style>
 </head>
 <body>
+  <!-- Cover screen + intro music -->
+  <div id="coverScreen">
+    <div class="cover-inner">
+      <div class="cover-logo">CHRISTMAS FEUD</div>
+      <p class="cover-subtitle">Christmas Edition</p>
+
+      <div class="cover-countdown" id="coverCountdown">30</div>
+
+      <button id="coverStartBtn" class="cover-start-btn">
+        Tap to start countdown
+      </button>
+
+      <p class="cover-hint" id="coverHint">
+        Music will play while the timer counts down.  
+        When it reaches 1, tap again to begin Round 1.
+      </p>
+    </div>
+  </div>
+
+  <!-- Background music (file must be in the same folder as index.html) -->
+  <audio id="introMusic" src="bg-music.mp3" preload="auto"></audio> 
   <!-- Simple audio elements for ding & buzz -->
   <audio id="dingSound" preload="auto">
     <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" type="audio/ogg" />
@@ -1539,6 +1630,77 @@
       },
       { once: true }
     );
+    // ---------- Cover screen & intro music ----------
+
+const coverScreen = document.getElementById('coverScreen');
+const coverCountdownEl = document.getElementById('coverCountdown');
+const coverStartBtn = document.getElementById('coverStartBtn');
+const coverHintEl = document.getElementById('coverHint');
+const introMusic = document.getElementById('introMusic');
+
+let coverCountdownValue = 30;
+let coverCountdownTimer = null;
+let coverCountdownStarted = false;
+let coverCountdownFinished = false;
+
+function startCoverCountdown() {
+  if (coverCountdownStarted || coverCountdownFinished) return;
+
+  coverCountdownStarted = true;
+  coverCountdownValue = 30;
+  coverCountdownEl.textContent = coverCountdownValue;
+
+  // Disable the button while countdown runs
+  coverStartBtn.disabled = true;
+  coverStartBtn.textContent = 'Get ready...';
+
+  // Start music on first user interaction (required by iOS)
+  if (introMusic) {
+    introMusic.currentTime = 0;
+    introMusic.play().catch(() => {
+      // If autoplay fails, we just continue silently
+    });
+  }
+
+  coverCountdownTimer = setInterval(() => {
+    coverCountdownValue--;
+
+    if (coverCountdownValue <= 1) {
+      coverCountdownEl.textContent = '1';
+
+      clearInterval(coverCountdownTimer);
+      coverCountdownTimer = null;
+      coverCountdownStarted = false;
+      coverCountdownFinished = true;
+
+      // Stop the music at 1
+      if (introMusic) {
+        introMusic.pause();
+        introMusic.currentTime = 0;
+      }
+
+      coverStartBtn.disabled = false;
+      coverStartBtn.textContent = 'Tap to begin Round 1';
+      coverHintEl.textContent =
+        'When everyone is ready, tap to reveal the first question.';
+    } else {
+      coverCountdownEl.textContent = coverCountdownValue;
+    }
+  }, 1000);
+}
+
+coverStartBtn.addEventListener('click', () => {
+  if (!coverCountdownFinished) {
+    // First tap: start countdown + music
+    startCoverCountdown();
+  } else {
+    // Second tap (after countdown finished): hide cover, show game
+    coverScreen.classList.add('hidden');
+    setTimeout(() => {
+      coverScreen.style.display = 'none';
+    }, 400);
+  }
+});
   </script>
 </body>
 </html>
