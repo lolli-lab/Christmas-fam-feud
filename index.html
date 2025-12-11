@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Family Feud – Christmas Edition</title>
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
     :root {
       --bg-dark: #4b0000;
@@ -507,6 +506,104 @@
       color: transparent;
     }
 
+    /* ----- Cover screen overlay ----- */
+    .cover-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #b30000, #4b0000 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .cover-card {
+      max-width: 520px;
+      width: 100%;
+      background: linear-gradient(#ffefc4, #ffcc66 55%, #ffb347);
+      border-radius: 28px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      border: 6px solid #ffcc66;
+      padding: 18px 18px 22px;
+      text-align: center;
+    }
+
+    .cover-logo {
+      width: 180px;
+      height: 180px;
+      border-radius: 32px;
+      display: block;
+      margin: 0 auto 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .cover-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #6b0000;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .cover-subtitle {
+      font-size: 14px;
+      color: #7a2100;
+      margin-bottom: 10px;
+    }
+
+    .cover-countdown-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #5a0000;
+      margin-bottom: 4px;
+    }
+
+    .cover-countdown {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: linear-gradient(#8a0000, #b30000);
+      color: #ffe9b7;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      margin-bottom: 12px;
+    }
+
+    .cover-countdown span {
+      font-size: 26px;
+      font-weight: 800;
+      min-width: 32px;
+    }
+
+    .cover-btn {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 10px 30px;
+      border-radius: 999px;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(#0c7a26, #09501a);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .cover-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .cover-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6b0000;
+    }
+
     @media (max-width: 900px) {
       .panel {
         width: 100%;
@@ -527,9 +624,42 @@
     <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" type="audio/ogg" />
   </audio>
 
+  <!-- Background music: will play only during cover countdown -->
+  <audio id="bgMusic" preload="auto" loop>
+    <!-- Put bg-music.mp3 in this repo, or change src to your music file -->
+    <source src="bg-music.mp3" type="audio/mpeg" />
+  </audio>
+
   <div class="frame">
     <div class="title">FAMILY FEUD</div>
     <div class="subtitle">CHRISTMAS EDITION</div>
+  </div>
+
+  <!-- Cover screen: shows logo + countdown before Round 1 -->
+  <div id="coverOverlay" class="cover-overlay">
+    <div class="cover-card">
+      <img src="apple-touch-icon.png" alt="Christmas Feud logo" class="cover-logo" />
+
+      <div class="cover-title">Christmas Feud</div>
+      <div class="cover-subtitle">
+        Get your teams ready, then tap Start when you're set to play.
+      </div>
+
+      <div id="coverCountdownLabel" class="cover-countdown-label">
+        Starting in…
+      </div>
+      <div class="cover-countdown">
+        <span id="coverSeconds">30</span>s
+      </div>
+
+      <button id="coverStartBtn" class="cover-btn">
+        Start Game
+      </button>
+
+      <div class="cover-hint">
+        Countdown will stop at 1. Tap <strong>Start Game</strong> when everyone is ready.
+      </div>
+    </div>
   </div>
 
   <div class="content">
@@ -979,10 +1109,35 @@
       a.play().catch(() => {});
     }
 
+    // Background music helpers
+    let bgMusicPlaying = false;
+
+    function playBgMusic() {
+      const bg = document.getElementById("bgMusic");
+      if (!bg || bgMusicPlaying) return;
+      bgMusicPlaying = true;
+      bg.currentTime = 0;
+      bg.play().catch(() => {
+        bgMusicPlaying = false;
+      });
+    }
+
+    function stopBgMusic() {
+      const bg = document.getElementById("bgMusic");
+      if (!bg) return;
+      bg.pause();
+      bg.currentTime = 0;
+      bgMusicPlaying = false;
+    }
+
     // ---- State ----
     let currentRoundIndex = 0;
     let scores = [0, 0];
     let lastRevealed = null;
+
+    // Cover-screen state
+    let coverSeconds = 30;
+    let coverInterval = null;
 
     const questionEl = document.getElementById("questionText");
     const answersContainer = document.getElementById("answersContainer");
@@ -1310,6 +1465,54 @@
     btnModeBoard.addEventListener("click", () => setMode("board"));
     btnModeFast.addEventListener("click", () => setMode("fast"));
 
+    // ----- Cover screen logic -----
+    function updateCoverDisplay() {
+      const secEl = document.getElementById("coverSeconds");
+      if (secEl) {
+        secEl.textContent = String(coverSeconds);
+      }
+    }
+
+    function startCoverCountdown() {
+      const labelEl = document.getElementById("coverCountdownLabel");
+      coverSeconds = 30;
+      updateCoverDisplay();
+      if (labelEl) {
+        labelEl.textContent = "Starting in…";
+      }
+
+      if (coverInterval) clearInterval(coverInterval);
+
+      coverInterval = setInterval(() => {
+        if (coverSeconds > 1) {
+          coverSeconds--;
+          updateCoverDisplay();
+
+          if (coverSeconds === 1) {
+            // Stop music at 1 and let the host take over
+            stopBgMusic();
+            if (labelEl) {
+              labelEl.textContent = "Ready – tap Start when your teams are set";
+            }
+            clearInterval(coverInterval);
+            coverInterval = null;
+          }
+        }
+      }, 1000);
+    }
+
+    function startGameFromCover() {
+      const overlay = document.getElementById("coverOverlay");
+      if (overlay) {
+        overlay.style.display = "none";
+      }
+      if (coverInterval) {
+        clearInterval(coverInterval);
+        coverInterval = null;
+      }
+      // Music already stopped at 1; do not restart here
+    }
+
     // ---- Init ----
     placeLights();
     updateScores();
@@ -1317,10 +1520,21 @@
     renderFastMoney();
     setMode("board");
 
-    // First tap on page should be allowed to play audio
+    // Start the cover countdown and wire the Start button
+    startCoverCountdown();
+    const coverBtn = document.getElementById("coverStartBtn");
+    if (coverBtn) {
+      coverBtn.addEventListener("click", startGameFromCover);
+    }
+
+    // First tap on the page:
+    // - unlocks audio for Safari
+    // - starts background music (for the countdown)
+    // - plays a ding once to "wake up" audio
     window.addEventListener(
       "touchstart",
       () => {
+        playBgMusic();
         playDing();
       },
       { once: true }
